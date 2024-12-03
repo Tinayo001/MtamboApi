@@ -1,14 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_spectacular.utils import extend_schema
 from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework import serializers
 from .models import User
+from django.contrib.auth.hashers import check_password
 
+from .permissions import  IsDeveloper, IsTechnician, IsMaintenance
 from .serializers import (
     UserSerializer,
     UserSignupSerializer,
@@ -58,7 +60,6 @@ class SignupView(APIView):
             return Response({"message": "User created successfully", "tokens": tokens}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 # User Login View
 class LoginView(APIView):
     """
@@ -94,7 +95,6 @@ class LoginView(APIView):
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 # Update User View
 class UpdateUserView(APIView):
-    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=UserUpdateSerializer,
@@ -127,6 +127,8 @@ class ChangePasswordView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
 # Delete User View
 class DeleteUserView(APIView):
     permission_classes = [IsAuthenticated]
@@ -142,7 +144,7 @@ class DeleteUserView(APIView):
 
 # Admin-Only User List View
 class ListUsersView(APIView):
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         responses={200: UserSerializer(many=True)},
@@ -156,7 +158,7 @@ class ListUsersView(APIView):
 
 # Password Reset Request View
 class PasswordResetRequestView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=PasswordResetRequestSerializer,
@@ -185,7 +187,7 @@ class PasswordResetRequestView(APIView):
 
 # Password Reset View
 class PasswordResetView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=PasswordResetSerializer,

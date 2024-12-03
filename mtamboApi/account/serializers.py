@@ -1,9 +1,10 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from .models import AccountType, User
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
-
+from django.contrib.auth.password_validation import validate_password
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -54,8 +55,6 @@ def create(self, validated_data):
     
     return user
 
-    
-
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     """
@@ -70,37 +69,34 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         """
         Validate that the account type is valid.
         """
-        if value not in [choice[0] for choice in User.AccountType.choices]:
+        valid_choices = [choice[0] for choice in User._meta.get_field('account_type').choices]
+        if value not in valid_choices:
             raise serializers.ValidationError("Invalid account type")
         return value
 
 
+
 class ChangePasswordSerializer(serializers.Serializer):
-    """
-    Serializer for changing a user's password.
-    """
-    old_password = serializers.CharField(write_only=True, min_length=8)
-    new_password = serializers.CharField(write_only=True, min_length=8)
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
 
-    def validate(self, data):
-        """
-        Validate that the old password is correct.
-        """
-        user = self.context['user']
-        if not user.check_password(data['old_password']):
-            raise serializers.ValidationError({"old_password": "Incorrect password"})
-        if data['old_password'] == data['new_password']:
-            raise serializers.ValidationError({"new_password": "New password cannot be the same as the old password"})
-        return data
+    def validate_old_password(self, value):
+        user = self.context.get("user")
+        # Check if the old password is correct
+        if not user.check_password(value):
+            raise serializers.ValidationError("Incorrect old password")
+        return value
 
-    def save(self):
-        """
-        Save the new password for the user.
-        """
-        user = self.context['user']
-        user.set_password(self.validated_data['new_password'])
-        user.save()
-        return user
+    def validate_new_password(self, value):
+        # Ensure the new password is not the same as the old one (optional)
+        user = self.context.get("user")
+        if user.check_password(value):
+            raise serializers.ValidationError("New password cannot be the same as the old password")
+        
+        # Add any other password validation here (e.g., length, complexity)
+
+        return value
+
 class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField()
 
@@ -128,4 +124,3 @@ class PasswordResetSerializer(serializers.Serializer):
         except Exception:
             raise serializers.ValidationError({"token": "Invalid or expired token."})
         return data
-

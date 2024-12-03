@@ -1,4 +1,4 @@
-#!/home/tinayo001/Backend/mtamboApi/venv/bin/python3
+#!/home/tinayo001/MtamboApi/mtamboApi/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
