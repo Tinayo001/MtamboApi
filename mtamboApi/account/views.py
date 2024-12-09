@@ -10,7 +10,7 @@ from rest_framework import serializers
 from .models import User
 from django.contrib.auth.hashers import check_password
 
-from .permissions import  IsDeveloper, IsTechnician, IsMaintenance
+from .permissions import  IsDeveloper, IsTechnician, IsMaintenance_Company
 from .serializers import (
     UserSerializer,
     UserSignupSerializer,
@@ -62,9 +62,6 @@ class SignupView(APIView):
 
 # User Login View
 class LoginView(APIView):
-    """
-    Authenticate a user with their email and password, and return JWT tokens.
-    """
     @extend_schema(
         request=UserSignupSerializer,
         responses={200: "Access and Refresh Tokens"},
@@ -94,6 +91,7 @@ class LoginView(APIView):
         else:
             return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
 # Update User View
+
 class UpdateUserView(APIView):
 
     @extend_schema(
@@ -111,14 +109,13 @@ class UpdateUserView(APIView):
 
 # Change Password View
 class ChangePasswordView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
+   @extend_schema(
         request=ChangePasswordSerializer,
         responses={200: "Password changed successfully"},
         description="Change the password for the authenticated user"
     )
-    def post(self, request):
+
+   def post(self, request):
         serializer = ChangePasswordSerializer(data=request.data, context={"user": request.user})
         if serializer.is_valid():
             request.user.set_password(serializer.validated_data["new_password"])
@@ -131,7 +128,6 @@ class ChangePasswordView(APIView):
 
 # Delete User View
 class DeleteUserView(APIView):
-    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         description="Delete the authenticated user's account",
@@ -143,6 +139,7 @@ class DeleteUserView(APIView):
 
 
 # Admin-Only User List View
+@extend_schema(description="Retrieve a list of all users")
 class ListUsersView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -157,8 +154,8 @@ class ListUsersView(APIView):
 
 
 # Password Reset Request View
+
 class PasswordResetRequestView(APIView):
-    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=PasswordResetRequestSerializer,

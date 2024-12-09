@@ -15,7 +15,7 @@ class IsTechnician(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.account_type == AccountType.TECHNICIAN
 
-class IsMaintenance(BasePermission):
+class IsMaintenance_Company(BasePermission):
     """
     Custom permission to allow access to maintenance companies only.
     """

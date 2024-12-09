@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractUser
 # Enum for account types
 class AccountType(models.TextChoices):
     DEVELOPER = 'developer', 'Developer'
-    MAINTENANCE = 'maintenance', 'Maintenance'
+    MAINTENANCE = 'maintenance_company', 'Maintenance_Company'
     TECHNICIAN = 'technician', 'Technician'
 
 # Custom user model extending AbstractUser
@@ -25,7 +25,7 @@ class User(AbstractUser):
         Generate a unique username based on the user's first and last names.
         If the username already exists, append a counter to ensure uniqueness.
         """
-        base_username = f"{self.first_name.lower()}.{self.last_name.lower()}"
+        base_username = f"{self.first_name.lower()} {self.last_name.lower()}"
         username = base_username
         counter = 1
         while User.objects.filter(username=username).exists():
@@ -43,4 +43,5 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username} ({self.account_type})"
+
 
