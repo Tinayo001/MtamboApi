@@ -10,7 +10,7 @@ class MaintenanceProviderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MaintenanceProvider
-        fields = '__all__'
+        fields = ['id', 'speacialization', 'company_name', 'company_address', 'company_registration_number']
 
     def create(self, validated_data):
         return MaintenanceProvider.objects.create(**validated_data)
