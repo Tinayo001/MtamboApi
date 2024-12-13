@@ -1,5 +1,5 @@
-from uuid import uuid4
 from django.db import models
+from uuid import uuid4
 from django.contrib.auth.models import AbstractUser
 
 # Enum for account types
@@ -10,7 +10,7 @@ class AccountType(models.TextChoices):
 
 # Custom user model extending AbstractUser
 class User(AbstractUser):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=True)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
     account_type = models.CharField(

@@ -5,6 +5,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.contrib.auth.password_validation import validate_password
+from Maintenance_Company.models import MaintenanceProvider
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -20,40 +21,20 @@ class UserSignupSerializer(serializers.ModelSerializer):
         model = User
         fields = ('email', 'password', 'first_name', 'last_name', 'phone_number', 'account_type')
 
+    def validate_account_type(self, value):
+        """
+        Ensure the account type is valid at the time of creation.
+        """
+        if value not in [choice[0] for choice in User.AccountType.choices]:
+            raise serializers.ValidationError("Invalid account type selected.")
+        return value
+
     def create(self, validated_data):
         user = User(**validated_data)
         user.set_password(validated_data['password'])  # Hash the password
         user.is_active = True  # Ensure the user is active
         user.save()
         return user
-
-
-def create(self, validated_data):
-    """
-    Create a user with the provided validated data.
-    """
-    # Generate username if not provided
-    username = validated_data.get('username', None)
-    if not username:
-        # Generate the username based on first_name and last_name (or any other logic you want)
-        user_instance = User(**validated_data)
-        username = user_instance.generate_username()
-
-    # Create the user
-    user = User.objects.create_user(
-        username=username,  # Use the generated or provided username
-        email=validated_data['email'],
-        password=validated_data['password'],  # Automatically hashes the password
-        first_name=validated_data.get('first_name', ''),
-        last_name=validated_data.get('last_name', ''),
-        phone_number=validated_data.get('phone_number', ''),
-        account_type=validated_data.get('account_type', ''),
-
-    )
-    user.set_password(validated_data['password'])  # Ensure password is hashed
-    user.save()
-    
-    return user
 
 
 class UserUpdateSerializer(serializers.ModelSerializer):

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from account.models import User  # Import the User model from the account app
 
@@ -12,6 +13,7 @@ class MaintenanceProvider(models.Model):
         (GENERATORS, 'Generators'),
     ]
 
+    id = models.UUIDField(primary_key=True, editable=False, default=uuid.uuid4),
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     specialization = models.CharField(max_length=20, choices=SPECIALIZATION_CHOICES, default=HVAC)
     company_name = models.CharField(max_length=255, null=False, blank=False)

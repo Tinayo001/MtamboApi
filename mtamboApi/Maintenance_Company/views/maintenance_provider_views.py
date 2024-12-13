@@ -5,9 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from ..models import MaintenanceProvider
 from ..serializers import MaintenanceProviderSerializer
+from .permissions import IsAccountType
+from .permissions import IsMaintenanceCompany
 
 class MaintenanceCompanyAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsMaintenanceCompany]
 
     @extend_schema(
         responses={200: MaintenanceProviderSerializer},
